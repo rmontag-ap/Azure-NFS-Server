@@ -472,4 +472,55 @@
   ]
 }
 
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "type": "string"
+    },
+    "uniquePrefix": {
+      "type": "string"
+    },
+    "imageLocation": {
+      "type": "string"
+    },
+    "masterHostName": {
+      "type": "string"
+    },
+    "hpcUserName": {
+      "type": "string"
+    },
+    "storageAccountKey": {
+      "type": "securestring"
+    },
+    "downloadScriptURI": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[concat('transfer', parameters('uniquePrefix'), 'vm/ext')]",
+      "apiVersion": "2015-05-01-preview",
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/transfer', parameters('uniquePrefix'), 'vm')]"
+      ],
+      "location": "[parameters('location')]",
+      "properties": {
+        "publisher": "Microsoft.OSTCExtensions",
+        "type": "CustomScriptForLinux",
+        "typeHandlerVersion": "1.4",
+        "settings": {
+          "fileUris": [
+            "[parameters('downloadScriptURI')]"
+          ]
+        },
+        "protectedSettings": {
+          "commandToExecute": "[concat('bash download.sh ', parameters('imageLocation'),' ', parameters('storageAccountKey'),' ', parameters('masterHostName'),' ', parameters('hpcUserName'))]"
+        }
+      }
+    }
+  ]
+}
 
