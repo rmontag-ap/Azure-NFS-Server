@@ -445,6 +445,9 @@
         }
       }
     },
+    
+    
+    
     {
       "name": "[concat(parameters('uniquePrefix'), 'script0')]",
       "type": "Microsoft.Resources/deployments",
@@ -458,46 +461,15 @@
           "uri": "[variables('downloadTemplateURI')]",
           "contentVersion": "1.0.0.0"
         },
-        "parameters": {
-          "location": { "value": "[variables('location')]" },
-          "uniquePrefix": { "value": "[parameters('uniquePrefix')]" },
-          "imageLocation": { "value": "[parameters('imageLocation')]" },
-          "masterHostName": { "value": "[concat('transfer', parameters('uniquePrefix'), 'vm')]" },
-          "hpcUserName": { "value": "[parameters('hpcUserName')]" },
-          "storageAccountKey": { "value": "[parameters('storageAccountKey')]" },
-          "downloadScriptURI": { "value": "[variables('downloadScriptURI')]" }
-        }
+       
       }
     }
   ]
 }
 
 {
-  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-  "contentVersion": "1.0.0.0",
-  "parameters": {
-    "location": {
-      "type": "string"
-    },
-    "uniquePrefix": {
-      "type": "string"
-    },
-    "imageLocation": {
-      "type": "string"
-    },
-    "masterHostName": {
-      "type": "string"
-    },
-    "hpcUserName": {
-      "type": "string"
-    },
-    "storageAccountKey": {
-      "type": "securestring"
-    },
-    "downloadScriptURI": {
-      "type": "string"
-    }
-  },
+  
+  
   "resources": [
     {
       "type": "Microsoft.Compute/virtualMachines/extensions",
