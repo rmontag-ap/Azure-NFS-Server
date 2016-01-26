@@ -105,7 +105,7 @@
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('networkSettings').virtualNetworkName)]",
     "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('networkSettings').subnet.dse.name)]",
     "templateBaseUrl": "https://raw.githubusercontent.com/grandparoach/Azure-NFS-Server/master/",
-    "installationCLI": "[concat('bash azuredeploy.sh ', variables('masterVMName'), ' ', variables('workerVMName'), ' ', parameters('workerNodeCount'), ' ', parameters('hpcUserName'), ' ', variables('templateBaseUrl'))]",
+    "installationCLI": "[concat('bash azuredeploy.sh ', variables('masterVMName'), ' ', parameters('hpcUserName'))]",
     "storageAccountType": "Standard_LRS"
   },
   "resources": [
