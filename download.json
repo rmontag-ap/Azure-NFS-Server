@@ -8,17 +8,11 @@
     "uniquePrefix": {
       "type": "string"
     },
-    "imageLocation": {
-      "type": "string"
-    },
     "masterHostName": {
       "type": "string"
     },
     "hpcUserName": {
       "type": "string"
-    },
-    "storageAccountKey": {
-      "type": "securestring"
     },
     "downloadScriptURI": {
       "type": "string"
@@ -40,7 +34,7 @@
           ]
         },
         "protectedSettings": {
-          "commandToExecute": "[concat('bash download.sh ', parameters('imageLocation'),' ', parameters('storageAccountKey'),' ', parameters('masterHostName'),' ', parameters('hpcUserName'))]"
+          "commandToExecute": "[concat('bash download.sh ', parameters('masterHostName'),' ', parameters('hpcUserName'))]"
         }
       }
     }
