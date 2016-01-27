@@ -444,6 +444,30 @@
           }
         }
       }
+    },
+    {
+      "name": "[concat(parameters('uniquePrefix'), 'script0')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/transfer', parameters('uniquePrefix'), 'vm')]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('downloadTemplateURI')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "location": { "value": "[variables('location')]" },
+          "uniquePrefix": { "value": "[parameters('uniquePrefix')]" },
+          "imageLocation": { "value": "[parameters('imageLocation')]" },
+          "masterHostName": { "value": "[concat('transfer', parameters('uniquePrefix'), 'vm')]" },
+          "hpcUserName": { "value": "[parameters('hpcUserName')]" },
+          "storageAccountKey": { "value": "[parameters('storageAccountKey')]" },
+          "downloadScriptURI": { "value": "[variables('downloadScriptURI')]" }
+        }
+      }
     }
   ]
 }
