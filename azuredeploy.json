@@ -468,31 +468,6 @@
           "downloadScriptURI": { "value": "[variables('downloadScriptURI')]" }
         }
       }
-    },
-    {
-      "name": "[concat(parameters('uniquePrefix'), 'script', string(add(copyIndex(), 1)))]",
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2015-01-01",
-      "dependsOn": [
-        "[concat('Microsoft.Resources/deployments/', parameters('uniquePrefix'), 'script', copyIndex())]"
-      ],
-      "copy": {
-        "name": "uploadLoop",
-        "count": "[parameters('numberOfSAs')]"
-      },
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": {
-          "uri": "[variables('uploadTemplateURI')]",
-          "contentVersion": "1.0.0.0"
-        },
-        "parameters": {
-          "location": { "value": "[variables('location')]" },
-          "uniquePrefix": { "value": "[parameters('uniquePrefix')]" },
-          "index": { "value": "[copyIndex()]" },
-          "uploadScriptURI": { "value": "[variables('uploadScriptURI')]" }
-        }
-      }
     }
   ]
 }
