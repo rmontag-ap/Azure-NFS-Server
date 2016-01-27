@@ -216,7 +216,7 @@
       "location": "[variables('location')]",
       "dependsOn": [
         "[concat('Microsoft.Network/publicIPAddresses/transfer', parameters('uniquePrefix'), 'ip')]",
-        "[concat('Microsoft.Resources/deployments/', parameters('uniquePrefix'), 'base')]"
+        "[concat('Microsoft.Network/virtualNetworks/', parameters('vnetName')]"
       ],
       "properties": {
         "ipConfigurations": [
