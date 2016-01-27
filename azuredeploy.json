@@ -170,26 +170,27 @@
   },
   "resources": [
     {
-      "name": "[concat(parameters('uniquePrefix'), 'base')]",
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2015-01-01",
+      "apiVersion": "2015-05-01-preview",
+      "type": "Microsoft.Network/virtualNetworks",
+      "name": "[parameters('vnetName')]",
+      "location": "[parameters('location')]",
       "properties": {
-        "mode": "Incremental",
-        "templateLink": {
-          "uri": "[variables('sharedResourcesTemplateUri ')]",
-          "contentVersion": "1.0.0.0"
+        "addressSpace": {
+          "addressPrefixes": [
+            "[parameters('addressPrefix')]"
+          ]
         },
-        "parameters": {
-          "uniquePrefix": { "value": "[parameters('uniquePrefix')]" },
-          "numberOfSAs": { "value": "[parameters('numberOfSAs')]" },
-          "vnetName": { "value": "[variables('vnetName')]" },
-          "addressPrefix": { "value": "[variables('addressPrefix')]" },
-          "subnetName": { "value": "[variables('subnetName')]" },
-          "subnetPrefix": { "value": "[variables('subnetPrefix')]" },
-          "location": { "value": "[variables('location')]" }
-        }
+        "subnets": [
+          {
+            "name": "[parameters('subnetName')]",
+            "properties": {
+              "addressPrefix": "[parameters('subnetPrefix')]"
+            }
+          }
+        ]
       }
     },
+
     {
       "type": "Microsoft.Storage/storageAccounts",
       "name": "[concat('transfer', parameters('uniquePrefix'), 'sa')]",
