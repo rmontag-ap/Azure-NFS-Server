@@ -3,7 +3,8 @@
 [[ -z "$HOME" || ! -d "$HOME" ]] && { echo 'fixing $HOME'; HOME=/root; } 
 export HOME 
 
-
+# apt-get -y update
+# apt-get -y install python3-pip libssl-dev libffi-dev npm
 yum -y update
 yum -y upgrade
 yum -y install epel-release gcc libffi-devel openssl-devel python-devel
@@ -11,12 +12,32 @@ yum -y install python-pip nodejs npm
 pip install blobxfer --upgrade  
 blobxfer --version  
 
+ln -s /usr/bin/nodejs /usr/bin/node
 npm install -g azure-cli 
 azure config mode arm 
 
+sa_domain=$(echo "$1" | cut -f3 -d/)
+sa_name=$(echo $sa_domain | cut -f1 -d.)
+container_name=$(echo "$1" | cut -f4 -d/)
+blob_name=$(echo "$1" | cut -f5 -d/)
+
+echo "sa name, container name, blob name:"    
+echo $sa_name    
+echo $container_name    
+echo $blob_name    
+echo "$container_name,$blob_name" > /mnt/resource/config.txt  
+
+attempts=0
+response=1
+while [ $response -ne 0 -a $attempts -lt 5 ]
+do
+  blobxfer $sa_name $container_name /mnt/resource/ --remoteresource $blob_name --storageaccountkey $2 --download --no-computefilemd5
+  response=$?
+  attempts=$((attempts+1))
+done
 
 # Set user args
-MASTER_HOSTNAME=$1
+MASTER_HOSTNAME=$3
 
 # Shares
 SHARE_HOME=/share/home
@@ -24,7 +45,7 @@ SHARE_DATA=/share/data
 
 
 # Hpc User
-HPC_USER=$2
+HPC_USER=$4
 HPC_UID=7007
 HPC_GROUP=hpc
 HPC_GID=7007
@@ -184,9 +205,6 @@ install_pkgs
 setup_shares
 setup_hpc_user
 setup_env
-
-
-
 
 
 
