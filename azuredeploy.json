@@ -21,6 +21,53 @@
         "description": "Size of the VM used to transfer the VM image to various storage acounts."
       }
     },
+    "computeVMSize": {
+      "type": "string",
+      "defaultValue": "Standard_A1",
+      "allowedValues": [
+        "Standard_A1",
+        "Standard_A2",
+        "Standard_A3",
+        "Standard_A4",
+        "Standard_A5",
+        "Standard_A6",
+        "Standard_A7",
+        "Standard_A8",
+        "Standard_A9",
+        "Standard_A10",
+        "Standard_A11",
+        "Standard_D1",
+        "Standard_D2",
+        "Standard_D3",
+        "Standard_D3_v2",
+        "Standard_D4",
+        "Standard_D4_v2",
+        "Standard_D5_v2",
+        "Standard_D11",
+        "Standard_D12",
+        "Standard_D12_v2",
+        "Standard_D13",
+        "Standard_D13_v2",
+        "Standard_D14",
+        "Standard_D14_v2",
+        "Standard_DS3",
+        "Standard_DS4",
+        "Standard_DS12",
+        "Standard_DS13",
+        "Standard_DS14",
+        "Standard_G2",
+        "Standard_G3",
+        "Standard_G4",
+        "Standard_G5",
+        "Standard_GS2",
+        "Standard_GS3",
+        "Standard_GS4",
+        "Standard_GS5"
+      ],
+      "metadata": {
+        "description": "Size of the VMs to be used for actual computation."
+      }
+    },
     "computeOSType": {
       "type": "string",
       "defaultValue": "Linux",
@@ -30,6 +77,43 @@
       ],
       "metadata": {
         "description": "Compute OS Type"
+      }
+    },
+    "deploymentType": {
+      "type": "string",
+      "defaultValue": "SingleAV",
+      "allowedValues": [
+        "VMSS",
+        "Single",
+        "SingleAV"
+      ],
+      "metadata": {
+        "description": "This determines whether the VMs will be deployed using scale sets, as individual VMs, or individual VMs in an availability set (maximum 100 for the last option)."
+      }
+    },
+    "numberOfSAs": {
+      "type": "int",
+      "metadata": {
+        "description": "Number of Storage Accounts to upload the custom image to."
+      }
+    },
+    "instanceCountPerSA": {
+      "type": "int",
+      "maxValue": 40,
+      "metadata": {
+        "description": "Number of VMs per Storage Account."
+      }
+    },
+    "imageLocation": {
+      "type": "string",
+      "metadata": {
+        "description": "URL of the base custom image, in the format of https://accountname.blob.core.windows.net/container/image.vhd."
+      }
+    },
+    "storageAccountKey": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Storage Account key for accessing the base custom image."
       }
     },
     "adminUsername": {
@@ -69,36 +153,43 @@
     "transferImagePublisher": "OpenLogic",
     "transferImageOffer": "CentOS",
     "transferOSVersion": "7.1",
-    
-    "templateLocation": "https://raw.githubusercontent.com/grandparoach/Azure-NFS-Server/master/",
+    "imagePieces": "[split(parameters('imageLocation'),'/')]",
+    "blobName": "[variables('imagePieces')[sub(length(variables('imagePieces')),1)]]",
+
+    "templateLocation": "https://raw.githubusercontent.com/grandparoach/Azure-HPC-templates/master/",
+
+    "sharedResourcesTemplateUri ": "[concat(variables('templateLocation'), 'shared-resources.json')]",
+    "uploadTemplateUri": "[concat(variables('templateLocation'), 'upload.json')]",
+    "finalTemplateUri": "[concat(variables('templateLocation'), 'final_')]",
 
     "downloadTemplateURI": "[concat(variables('templateLocation'), 'download.json')]",
-    "downloadScriptURI": "[concat(variables('templateLocation'), 'download.sh')]"
- 
+    "downloadScriptURI": "[concat(variables('templateLocation'), 'download.sh')]",
+    "uploadTemplateURI": "[concat(variables('templateLocation'), 'upload.json')]",
+    "uploadScriptURI": "[concat(variables('templateLocation'), 'upload.sh')]",
+    "finaldeployScriptURI": "[concat(variables('templateLocation'), 'finaldeploy.sh')]"
   },
   "resources": [
     {
-      "apiVersion": "2015-05-01-preview",
-      "type": "Microsoft.Network/virtualNetworks",
-      "name": "[variables('vnetName')]",
-      "location": "[variables('location')]",
+      "name": "[concat(parameters('uniquePrefix'), 'base')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
       "properties": {
-        "addressSpace": {
-          "addressPrefixes": [
-            "[variables('addressPrefix')]"
-          ]
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('sharedResourcesTemplateUri ')]",
+          "contentVersion": "1.0.0.0"
         },
-        "subnets": [
-          {
-            "name": "[variables('subnetName')]",
-            "properties": {
-              "addressPrefix": "[variables('subnetPrefix')]"
-            }
-          }
-        ]
+        "parameters": {
+          "uniquePrefix": { "value": "[parameters('uniquePrefix')]" },
+          "numberOfSAs": { "value": "[parameters('numberOfSAs')]" },
+          "vnetName": { "value": "[variables('vnetName')]" },
+          "addressPrefix": { "value": "[variables('addressPrefix')]" },
+          "subnetName": { "value": "[variables('subnetName')]" },
+          "subnetPrefix": { "value": "[variables('subnetPrefix')]" },
+          "location": { "value": "[variables('location')]" }
+        }
       }
     },
-
     {
       "type": "Microsoft.Storage/storageAccounts",
       "name": "[concat('transfer', parameters('uniquePrefix'), 'sa')]",
@@ -124,7 +215,7 @@
       "location": "[variables('location')]",
       "dependsOn": [
         "[concat('Microsoft.Network/publicIPAddresses/transfer', parameters('uniquePrefix'), 'ip')]",
-        "[concat('Microsoft.Network/virtualNetworks/', variables('vnetName')]"
+        "[concat('Microsoft.Resources/deployments/', parameters('uniquePrefix'), 'base')]"
       ],
       "properties": {
         "ipConfigurations": [
@@ -370,14 +461,72 @@
         "parameters": {
           "location": { "value": "[variables('location')]" },
           "uniquePrefix": { "value": "[parameters('uniquePrefix')]" },
+          "imageLocation": { "value": "[parameters('imageLocation')]" },
           "masterHostName": { "value": "[concat('transfer', parameters('uniquePrefix'), 'vm')]" },
           "hpcUserName": { "value": "[parameters('hpcUserName')]" },
+          "storageAccountKey": { "value": "[parameters('storageAccountKey')]" },
           "downloadScriptURI": { "value": "[variables('downloadScriptURI')]" }
+        }
+      }
+    },
+    {
+      "name": "[concat(parameters('uniquePrefix'), 'script', string(add(copyIndex(), 1)))]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "dependsOn": [
+        "[concat('Microsoft.Resources/deployments/', parameters('uniquePrefix'), 'script', copyIndex())]"
+      ],
+      "copy": {
+        "name": "uploadLoop",
+        "count": "[parameters('numberOfSAs')]"
+      },
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('uploadTemplateURI')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "location": { "value": "[variables('location')]" },
+          "uniquePrefix": { "value": "[parameters('uniquePrefix')]" },
+          "index": { "value": "[copyIndex()]" },
+          "uploadScriptURI": { "value": "[variables('uploadScriptURI')]" }
+        }
+      }
+    },
+    {
+      "name": "[concat(parameters('uniquePrefix'), 'full')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "dependsOn": [
+        "uploadLoop"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(variables('finalTemplateUri'), parameters('deploymentType'), '.json')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "uniquePrefix": { "value": "[parameters('uniquePrefix')]" },
+          "numberOfSAs": { "value": "[parameters('numberOfSAs')]" },
+          "instanceCountPerSA": { "value": "[parameters('instanceCountPerSA')]" },
+          "vmSize": { "value": "[parameters('computeVMSize')]" },
+          "OSType": { "value": "[parameters('computeOSType')]" },
+          "blobName": { "value": "[variables('blobName')]" },
+          "vnetName": { "value": "[variables('vnetName')]" },
+          "addressPrefix": { "value": "[variables('addressPrefix')]" },
+          "subnetName": { "value": "[variables('subnetName')]" },
+          "subnetPrefix": { "value": "[variables('subnetPrefix')]" },
+          "templateLocation": { "value": "[variables('templateLocation')]" },
+          "location": { "value": "[variables('location')]" },
+          "masterHostName": { "value": "[concat('transfer', parameters('uniquePrefix'), 'vm')]" },
+          "hpcUserName": { "value": "[parameters('hpcUserName')]" },
+          "finaldeployScriptURI": { "value": "[variables('finaldeployScriptURI')]" },
+          "adminUsername": { "value": "[parameters('adminUsername')]" },
+          "adminPassword": { "value": "[parameters('adminPassword')]" }
         }
       }
     }
   ]
 }
-
-
-
