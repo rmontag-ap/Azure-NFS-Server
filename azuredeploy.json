@@ -493,40 +493,6 @@
           "uploadScriptURI": { "value": "[variables('uploadScriptURI')]" }
         }
       }
-    },
-    {
-      "name": "[concat(parameters('uniquePrefix'), 'full')]",
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2015-01-01",
-      "dependsOn": [
-        "uploadLoop"
-      ],
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": {
-          "uri": "[concat(variables('finalTemplateUri'), parameters('deploymentType'), '.json')]",
-          "contentVersion": "1.0.0.0"
-        },
-        "parameters": {
-          "uniquePrefix": { "value": "[parameters('uniquePrefix')]" },
-          "numberOfSAs": { "value": "[parameters('numberOfSAs')]" },
-          "instanceCountPerSA": { "value": "[parameters('instanceCountPerSA')]" },
-          "vmSize": { "value": "[parameters('computeVMSize')]" },
-          "OSType": { "value": "[parameters('computeOSType')]" },
-          "blobName": { "value": "[variables('blobName')]" },
-          "vnetName": { "value": "[variables('vnetName')]" },
-          "addressPrefix": { "value": "[variables('addressPrefix')]" },
-          "subnetName": { "value": "[variables('subnetName')]" },
-          "subnetPrefix": { "value": "[variables('subnetPrefix')]" },
-          "templateLocation": { "value": "[variables('templateLocation')]" },
-          "location": { "value": "[variables('location')]" },
-          "masterHostName": { "value": "[concat('transfer', parameters('uniquePrefix'), 'vm')]" },
-          "hpcUserName": { "value": "[parameters('hpcUserName')]" },
-          "finaldeployScriptURI": { "value": "[variables('finaldeployScriptURI')]" },
-          "adminUsername": { "value": "[parameters('adminUsername')]" },
-          "adminPassword": { "value": "[parameters('adminPassword')]" }
-        }
-      }
     }
   ]
 }
