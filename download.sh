@@ -8,7 +8,7 @@ export HOME
 yum makecache fast
 yum -y update
 yum -y upgrade
-yum -y install epel-release gcc libffi-devel openssl-devel python-devel
+yum -y install epel-release gcc libffi-devel openssl-devel python-devel --skip-broken
 yum -y install python-pip nodejs npm
 pip install blobxfer --upgrade  
 blobxfer --version  
