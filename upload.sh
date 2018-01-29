@@ -11,7 +11,7 @@ attempts=0
 response=1
 while [ $response -ne 0 -a $attempts -lt 5 ]
 do
-  blobxfer $1 vhds "/mnt/resource/$blob_name" --remoteresource "$blob_name" --storageaccountkey $2 --upload --no-computefilemd5 --autovhd
+  blobxfer $1 vhds "/mnt/resource/$blob_name" --endpoint core.cloudapi.de --remoteresource "$blob_name" --storageaccountkey $2 --upload --no-computefilemd5 --autovhd
   response=$?
   attempts=$((attempts+1))
 done

@@ -26,9 +26,9 @@ echo $sa_name
 echo $container_name
 echo $blob_name
 
-blobxfer $sa_name $container_name /mnt/resource/ --remoteresource $blob_name --storageaccountkey $4 --download --no-computefilemd5
+blobxfer $sa_name $container_name /mnt/resource/ --endpoint core.cloudapi.de --remoteresource $blob_name --storageaccountkey $4 --download --no-computefilemd5
 
-blobxfer $1 vhds "/mnt/resource/$blob_name" --storageaccountkey $destkey --upload --no-computefilemd5 --autovhd --no-recursive
+blobxfer $1 vhds "/mnt/resource/$blob_name" --endpoint core.cloudapi.de --storageaccountkey $destkey --upload --no-computefilemd5 --autovhd --no-recursive
 
 /usr/bin/azure group deployment create $1 deploy1 -f 'New Cluster pubaddr.json' -p '{ "newStorageAccount": { "value": "'$1'" }}'
 
